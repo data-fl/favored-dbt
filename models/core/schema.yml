@@ -1,0 +1,17 @@
+version: 2
+
+models:
+  - name: dim_creator_handle_log
+    description: "Time-bounded mapping from handle → TikTok ID for point-in-time joins (valid_from/valid_to)."
+    columns:
+      - name: tiktok_id
+        description: "Unique TikTok ID"
+        tests: [not_null]
+      - name: handle
+        description: "Creator's TikTok Username"
+        tests: [not_null]
+      - name: valid_from
+        description: "Start of validity window (inclusive)"
+        tests: [not_null]
+      - name: valid_to
+        description: "End of validity window (exclusive); NULL = current"
