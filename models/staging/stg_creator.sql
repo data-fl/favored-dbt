@@ -43,7 +43,7 @@ handles_without_any_id as (
       min(observed_at)         as first_observed_at
   from raw_obs
   where handle_name is not null
-  group by lower(trim(handle_name))
+  group by handle_name
   having sum(case when tiktok_id is not null then 1 else 0 end) = 0
 ),
 
