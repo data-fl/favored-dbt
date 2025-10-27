@@ -33,7 +33,7 @@ ids_without_any_handle as (
   from raw_obs
   where tiktok_id is not null
   group by tiktok_id
-  having sum(case when handle_name is not null and handle_name <> '' then 1 else 0 end) = 0
+  having sum(case when handle_name is not null then 1 else 0 end) = 0
 ),
 
 -- 3) Handles that have NEVER had a tiktok_id
@@ -42,7 +42,7 @@ handles_without_any_id as (
       lower(trim(handle_name)) as handle_name,
       min(observed_at)         as first_observed_at
   from raw_obs
-  where handle_name is not null and handle_name <> ''
+  where handle_name is not null
   group by lower(trim(handle_name))
   having sum(case when tiktok_id is not null then 1 else 0 end) = 0
 ),

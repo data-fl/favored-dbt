@@ -15,7 +15,6 @@ with base as (
              coalesce(created_at, updated_at))             as observed_at -- if NULL, then don't use least
   from {{ ref('stg_tiktok_id_handle_map') }}
     where handle_name is not null
-    and handle_name <> ''
     and tiktok_id is not null
 ),
 

@@ -96,7 +96,18 @@ unioned as (
   union all select * from base_bravo_v1
   union all select * from base_bravo_v2
   union all select * from base_echo
+),
+
+normalized as (
+  select
+    /* collapse blanks to NULL */
+    nullif(trim(tiktok_id), '')          as tiktok_id,
+    nullif(lower(trim(handle_name)), '') as handle_name,
+    source_table,
+    created_at,
+    updated_at
+  from unioned
 )
 
 select *
-from unioned
+from normalized
