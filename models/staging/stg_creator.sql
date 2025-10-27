@@ -39,7 +39,7 @@ ids_without_any_handle as (
 -- 3) Handles that have NEVER had a tiktok_id
 handles_without_any_id as (
   select
-      lower(trim(handle_name)) as handle_name,
+      handle_name,
       min(observed_at)         as first_observed_at
   from raw_obs
   where handle_name is not null
