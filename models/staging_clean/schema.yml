@@ -13,3 +13,5 @@ sources:
     - name: BRAVO_V1
     - name: BRAVO_V2
     - name: ECHO
+    - name: ADDRESS_PHONE
+    - name: ZIP_LAT_LON
