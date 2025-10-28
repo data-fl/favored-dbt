@@ -21,6 +21,8 @@ models:
       Handles are excluded. The `id` field is normalized by removing
       prefixes (`temp_temp_`, `tiktok_`) and truncating anything after
       an underscore to ensure consistent ID values across sources."
+    tests:
+      - no_multi_tiktok_per_external_id
     columns:
       - name: map_id
         description: "Deterministic surrogate key generated as md5(id_type || '|' || id || '|' || id_source)."
