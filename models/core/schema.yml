@@ -16,126 +16,35 @@ models:
       - name: valid_to
         description: "End of validity window (exclusive); NULL = current"
 
-  - name: dim_creator_stats
-    description: >
-      Long-form, time-varying creator stats from TikTok sources (e.g., CREATORINFO,
-      ECHO, HYDRATE, MARKET) unpivoted into name/value pairs to track change over time.
+  - name: dim_creator_id_map
+    description: "Creator ID mapping table linking Echo creator IDs to TikTok IDs.
+      Handles are excluded. The `id` field is normalized by removing
+      prefixes (`temp_temp_`, `tiktok_`) and truncating anything after
+      an underscore to ensure consistent ID values across sources."
     columns:
-      - name: tiktok_id
-        description: Creator TikTok ID.
-        tests: [not_null]
-      - name: stat_name
-        description: Normalized name of the statistic (lowercased).
-        tests: [not_null]
-      - name: stat_value
-        description: Statistic value stored as VARCHAR (cast as needed downstream).
-      - name: updated_at
-        description: Source-derived timestamp representing when the stat was observed.
-        tests: [not_null]
-      - name: is_current
-        description: True if this is the latest row for (tiktok_id, stat_name).
+      - name: map_id
+        description: "Deterministic surrogate key generated as md5(id_type || '|' || id || '|' || id_source)."
         tests:
-          - accepted_values:
-              values: [true, false]
-    tests:
-      - dbt_utils.unique_combination_of_columns:
-          combination_of_columns: ['tiktok_id','stat_name','updated_at']
-
-  - name: dim_creator_email
-    description: >
-      Creator email dimension. Normalizes email, records source/ingestion time, and
-      flags a primary email per creator. ID is a Snowflake HASH(email_normalized, purpose, tiktok_id).
-    columns:
-      - name: creator_email_id
-        description: Deterministic hash ID of (email_normalized, purpose, tiktok_id).
-        tests: [not_null, unique]
+          - not_null
+          - unique
       - name: tiktok_id
-        description: Creator TikTok ID.
-        tests: [not_null]
-      - name: email_normalized
-        description: Lowercased/trimmed email used for deduplication.
-        tests: [not_null]
-      - name: email_raw
-        description: Raw email as seen in the source.
-      - name: purpose
-        description: Optional purpose label (e.g., agent, personal) when available.
-      - name: source
-        description: Source system for the record (e.g., 'echo', 'address_phone').
-        tests: [not_null]
-      - name: ingested_at
-        description: Timestamp when the record was ingested/observed.
-        tests: [not_null]
-      - name: is_primary
-        description: True if this is the chosen primary email for the creator.
+        description: "TikTok creator ID associated with the Echo creator record. May be null if not available in the Echo source."
+        tests: []
+      - name: id_type
+        description: "Type of the external identifier represented in `id`. For this model, always `echo_creator_id`."
         tests:
+          - not_null
           - accepted_values:
-              values: [true, false]
-
-  - name: dim_creator_phone
-    description: >
-      Creator phone dimension with light E.164 normalization (US/CA + already-E.164),
-      a stable hash phone_id (HASH(phone_e164)), source and ingestion info, and a
-      primary flag per creator.
-    columns:
-      - name: tiktok_id
-        description: Creator TikTok ID.
-        tests: [not_null]
-      - name: phone_id
-        description: Deterministic hash of phone_e164.
-        tests: [not_null, unique]
-      - name: phone_e164
-        description: Cleaned phone in E.164 when derivable; null when not confidently normalized.
-        tests: [not_null]
-      - name: raw_phone
-        description: Raw phone value from source prior to normalization.
-      - name: is_primary
-        description: True if this is the chosen primary phone for the creator.
+              values:
+                - echo_creator_id
+      - name: id
+        description: "Normalized Echo creator ID value. Cleaning logic removes the prefixes `temp_temp_` or `tiktok_` and strips any suffix beginning with `_`."
         tests:
-          - accepted_values:
-              values: [true, false]
-      - name: source
-        description: Source system for the record (e.g., 'address_phone').
-        tests: [not_null]
-      - name: ingested_at
-        description: Timestamp when the record was ingested/observed.
-        tests: [not_null]
-
-  - name: dim_creator_address
-    description: >
-      Creator address dimension. Normalizes casing (COUNTRY/STATE uppercased, CITY initcapped),
-      enriches with ZIP latitude/longitude when available, generates address_id as
-      HASH of normalized address fields (V1), and flags a primary address per creator.
-    columns:
-      - name: tiktok_id
-        description: Creator TikTok ID.
-        tests: [not_null]
-      - name: address_id
-        description: Deterministic hash of (country, state, city, zipcode, address_1, address_2).
-        tests: [not_null, unique]
-      - name: country
-        description: Country code (UPPERCASED).
-      - name: state
-        description: State/region code (UPPERCASED).
-      - name: city
-        description: City name (Initcap).
-      - name: zipcode
-        description: ZIP (5-digit core when derivable).
-      - name: address_1
-        description: Address line 1 (lowercased for hash stability).
-      - name: address_2
-        description: Address line 2 (lowercased for hash stability).
-      - name: latitude
-        description: ZIP centroid latitude when available.
-      - name: longitude
-        description: ZIP centroid longitude when available.
-      - name: is_primary
-        description: True if this is the chosen primary address for the creator.
+          - not_null
+      - name: id_source
+        description: "Source system or staging model that provided the ID. For this model, always `echo`."
         tests:
+          - not_null
           - accepted_values:
-              values: [true, false]
-      - name: source
-        description: Source system for the record (e.g., 'address_phone').
-        tests: [not_null]
-      - name: ingested_at
-        description: Timestamp when the record was ingested/observed.
-        tests: [not_null]
+              values:
+                - echo
