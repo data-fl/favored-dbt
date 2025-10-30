@@ -17,10 +17,7 @@ models:
         description: "End of validity window (exclusive); NULL = current"
 
   - name: dim_creator_id_map
-    description: "Creator ID mapping table linking Echo creator IDs to TikTok IDs.
-      Handles are excluded. The `id` field is normalized by removing
-      prefixes (`temp_temp_`, `tiktok_`) and truncating anything after
-      an underscore to ensure consistent ID values across sources."
+    description: "A Mapping table that maps various types of creator IDs to their TikTok ID"
     tests:
       - no_multi_tiktok_per_external_id
     columns:
@@ -30,21 +27,21 @@ models:
           - not_null
           - unique
       - name: tiktok_id
-        description: "TikTok creator ID associated with the Echo creator record. May be null if not available in the Echo source."
+        description: "TikTok creator ID associated with the creator record. May be null if not available in the source."
         tests: []
       - name: id_type
-        description: "Type of the external identifier represented in `id`. For this model, always `echo_creator_id`."
+        description: "Type of the external identifier represented in `id`. The id could be from multiple social platforms."
         tests:
           - not_null
           - accepted_values:
               values:
                 - tiktok_creator_id
       - name: id
-        description: "Normalized Echo creator ID value. Cleaning logic removes the prefixes `temp_temp_` or `tiktok_` and strips any suffix beginning with `_`."
+        description: "Normalized creator ID value. Cleaning logic removes the prefixes `temp_temp_` or `tiktok_` and strips any suffix beginning with `_`."
         tests:
           - not_null
       - name: id_source
-        description: "Source system or staging model that provided the ID. For this model, always `echo`."
+        description: "Source system or staging model that provided the ID."
         tests:
           - not_null
           - accepted_values:
