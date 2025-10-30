@@ -16,6 +16,38 @@ models:
       - name: valid_to
         description: "End of validity window (exclusive); NULL = current"
 
+  - name: dim_creator_id_map
+    description: "A Mapping table that maps various types of creator IDs to their TikTok ID"
+    tests:
+      - no_multi_tiktok_per_external_id
+    columns:
+      - name: map_id
+        description: "Deterministic surrogate key generated as md5(id_type || '|' || id || '|' || id_source)."
+        tests:
+          - not_null
+          - unique
+      - name: tiktok_id
+        description: "TikTok creator ID associated with the creator record. May be null if not available in the source."
+        tests: []
+      - name: id_type
+        description: "Type of the external identifier represented in `id`. The id could be from multiple social platforms."
+        tests:
+          - not_null
+          - accepted_values:
+              values:
+                - tiktok_creator_id
+      - name: id
+        description: "Normalized creator ID value. Cleaning logic removes the prefixes `temp_temp_` or `tiktok_` and strips any suffix beginning with `_`."
+        tests:
+          - not_null
+      - name: id_source
+        description: "Source system or staging model that provided the ID."
+        tests:
+          - not_null
+          - accepted_values:
+              values:
+                - echo
+  
   - name: dim_creator_email
     description:
       One row per (tiktok_id, email) representing email addresses observed for TikTok creators
@@ -50,3 +82,5 @@ models:
         tests:
           - accepted_values:
               values: [true, false]
+
+
