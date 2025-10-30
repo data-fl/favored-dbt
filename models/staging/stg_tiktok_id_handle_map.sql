@@ -72,7 +72,7 @@ base_bravo_v1 as (
 
   select
     cast(tiktok_id as varchar)         as tiktok_id,
-    cast(null as varchar)              as handle_name,    -- DEEP: ignore handle
+    cast(null as varchar)              as handle_name,    -- Ignore handle: DEEP datasets not reliable for handle mapping
     'bravo_v1'                         as source_table,
     cast(created_at as timestamp_ntz)  as created_at,
     cast(updated_at as timestamp_ntz)  as updated_at
@@ -84,7 +84,7 @@ base_bravo_v2 as (
 
   select
     cast(tiktok_id as varchar)         as tiktok_id,
-    cast(null as varchar)              as handle_name,    -- DEEP: ignore handle
+    cast(null as varchar)              as handle_name,    -- Ignore handle: DEEP datasets not reliable for handle mapping
     'bravo_v2'                         as source_table,
     cast(created_at as timestamp_ntz)  as created_at,
     cast(updated_at as timestamp_ntz)  as updated_at
@@ -96,7 +96,7 @@ base_echo as (
 
   select
     cast(tiktok_id as varchar)           as tiktok_id,
-    cast(null as varchar)                as handle_name,  -- DEEP: ignore handle
+    cast(null as varchar)                as handle_name,  -- Ignore handle: DEEP datasets not reliable for handle mapping
     'echo'                               as source_table,
     cast(created_time as timestamp_ntz)  as created_at,
     cast(last_updated_time as timestamp_ntz) as updated_at
