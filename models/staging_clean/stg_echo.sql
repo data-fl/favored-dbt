@@ -9,7 +9,7 @@ select
   lower(nullif(trim(handle_name), ''))::varchar              as handle_name,
   nullif(trim(bio), '')::varchar                             as bio,
   nullif(trim(bio_url), '')::varchar                         as bio_url,
-  creator_id::number                                         as creator_id,
+  creator_id::varchar                                         as creator_id,
   follower_count::number                                     as follower_count,
   lower(nullif(trim(email), ''))::varchar                    as email,
   nullif(trim(follower_ages), '')::varchar                   as follower_ages,

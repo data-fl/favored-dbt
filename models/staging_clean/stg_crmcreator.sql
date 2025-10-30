@@ -2,7 +2,7 @@
 
 select
   lower(nullif(trim(handle_name), ''))::varchar              as handle_name,
-  creator_id::number                                         as creator_id,
+  creator_id::varchar                                         as creator_id,
   nullif(trim(display_name), '')::varchar                    as display_name,
   followers::number                                          as followers,
   nullif(trim(category1_name), '')::varchar                  as category1_name,
