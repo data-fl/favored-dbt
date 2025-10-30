@@ -38,7 +38,7 @@ models:
           - not_null
           - accepted_values:
               values:
-                - echo_creator_id
+                - tiktok_creator_id
       - name: id
         description: "Normalized Echo creator ID value. Cleaning logic removes the prefixes `temp_temp_` or `tiktok_` and strips any suffix beginning with `_`."
         tests:

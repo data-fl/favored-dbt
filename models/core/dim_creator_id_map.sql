@@ -10,7 +10,7 @@ with src as (
     -- Echo creator_id → mapped to TikTok when available in same row
     select
         t.tiktok_id::varchar                    as tiktok_id,
-        'echo_creator_id'                       as id_type,
+        'tiktok_creator_id'                       as id_type,
         regexp_replace(
             regexp_replace(t.creator_id::varchar, '^(temp_temp_|tiktok_)', ''),  -- remove prefixes
             '_.*$',                                                              -- remove suffixes
