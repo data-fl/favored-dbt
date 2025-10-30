@@ -47,40 +47,37 @@ models:
           - accepted_values:
               values:
                 - echo
-  
+
   - name: dim_creator_email
-    description:
-      One row per (tiktok_id, email) representing email addresses observed for TikTok creators
-      across multiple raw sources. Rows are aggregated to earliest created_at and latest
-      updated_at for each pair; data_source reflects the row with the latest updated_at.
-      is_current flags the most recently updated email for a given tiktok_id.
+    description: "A table of creator email addresses collected from multiple TikTok data sources.
+      Each row represents a unique combination of TikTok ID and email. 
+      The table keeps the earliest date an email was first seen, the most recent update,
+      and flags which email is currently the most up to date for each creator."
     columns:
       - name: creator_email_id
-        description: "Surrogate key: to_varchar(abs(hash(tiktok_id, email))). Deterministic, positive string."
+        description: "Unique identifier for each creator–email combination, generated using a consistent hash."
         tests:
           - not_null
           - unique
       - name: tiktok_id
-        description: "Unique TikTok account identifier (from raw sources)."
+        description: "Unique identifier for a TikTok creator."
         tests:
           - not_null
       - name: email
-        description: "Creator email address (normalized to lowercase and trimmed in staging)."
+        description: "Creator email address that has been cleaned (made lowercase and trimmed of any white space)."
         tests:
           - not_null
       - name: data_source
-        description: "Source table where the latest record for (tiktok_id, email) came from."
+        description: "The original dataset where this creator’s email record was last updated."
         tests:
           - accepted_values:
-              values: ['CREATORINFO', 'HYDRATE', 'MARKET']
+              values: ['CREATORINFO', 'HYDRATE', 'MARKET', 'BRAVO_V1', 'BRAVO_V2', 'ECHO']
       - name: created_at
-        description: "Earliest observed create_date for the (tiktok_id, email) pair across sources."
+        description: "The earliest date this email address was first recorded for the creator."
       - name: updated_at
-        description: "Most recent observed last_update for the (tiktok_id, email) pair across sources."
+        description: "The most recent date this email record was updated."
       - name: is_current
-        description: "True if this email is the most recently updated for the given tiktok_id."
+        description: "Indicates whether this email is the creator’s most recently updated email address."
         tests:
           - accepted_values:
               values: [true, false]
-
-

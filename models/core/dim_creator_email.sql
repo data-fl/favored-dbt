@@ -9,11 +9,11 @@
 with creatorinfo as (
 
     select
-        tiktok_id                     as tiktok_id,
-        email_address                 as email, 
-        'CREATORINFO'                 as data_source,
-        create_date::timestamp_ntz    as created_at_raw,
-        last_update::timestamp_ntz    as updated_at_raw
+        tiktok_id           as tiktok_id,
+        email_address       as email,       
+        'CREATORINFO'       as data_source,
+        create_date         as created_at_raw,
+        last_update         as updated_at_raw
     from {{ ref('stg_creatorinfo') }}
 
 ),
@@ -21,11 +21,11 @@ with creatorinfo as (
 hydrate as (
 
     select
-        tiktok_id                     as tiktok_id,
-        email_address                 as email,
-        'HYDRATE'                     as data_source,
-        create_date::timestamp_ntz    as created_at_raw,
-        last_update::timestamp_ntz    as updated_at_raw
+        tiktok_id           as tiktok_id,
+        email_address       as email,
+        'HYDRATE'           as data_source,
+        create_date         as created_at_raw,
+        last_update         as updated_at_raw
     from {{ ref('stg_hydrate') }}
 
 ),
@@ -33,16 +33,51 @@ hydrate as (
 market as (
 
     select
-        tiktok_id                     as tiktok_id,
-        email_address                 as email,
-        'MARKET'                      as data_source,
-        create_date::timestamp_ntz    as created_at_raw,
-        last_update::timestamp_ntz    as updated_at_raw
+        tiktok_id           as tiktok_id,
+        email_address       as email,
+        'MARKET'            as data_source,
+        create_date         as created_at_raw,
+        last_update         as updated_at_raw
     from {{ ref('stg_market') }}
 
 ),
 
--- 1) Union all sources and keep only valid (tiktok_id, email) pairs
+bravo_v1 as (
+
+    select
+        tiktok_id           as tiktok_id,
+        email               as email,       
+        'BRAVO_V1'          as data_source,
+        created_at          as created_at_raw,
+        updated_at          as updated_at_raw
+    from {{ ref('stg_bravo_v1') }}
+
+),
+
+bravo_v2 as (
+
+    select
+        tiktok_id           as tiktok_id,
+        email               as email,
+        'BRAVO_V2'          as data_source,
+        created_at          as created_at_raw,
+        updated_at          as updated_at_raw
+    from {{ ref('stg_bravo_v2') }}
+
+),
+
+echo as (
+
+    select
+        tiktok_id           as tiktok_id,
+        email               as email,
+        'ECHO'              as data_source,
+        created_time        as created_at_raw,
+        last_updated_time   as updated_at_raw
+    from {{ ref('stg_echo') }}
+
+),
+
 base as (
 
     select * from creatorinfo
@@ -50,6 +85,12 @@ base as (
     select * from hydrate
     union all
     select * from market
+    union all
+    select * from bravo_v1
+    union all
+    select * from bravo_v2
+    union all
+    select * from echo
 
 ),
 
@@ -67,7 +108,6 @@ base_clean as (
 
 ),
 
--- 2) Collapse to one row per (tiktok_id, email) with min(created_at), max(updated_at)
 pair_agg as (
 
     select
@@ -80,7 +120,6 @@ pair_agg as (
 
 ),
 
--- 3) Choose data_source for each (tiktok_id, email) from the row with the latest updated_at
 latest_source as (
 
     select tiktok_id, email, data_source
@@ -97,8 +136,7 @@ latest_source as (
 
 ),
 
--- 4) Join selected data_source back to the aggregated row
-core_email as (
+core as (
 
     select
         p.tiktok_id,
@@ -113,18 +151,14 @@ core_email as (
 
 )
 
--- 5) Final: surrogate key + is_current per tiktok_id
 select
-    /* Deterministic numeric surrogate key without dbt-utils */
-    abs(hash(tiktok_id, email))                            as creator_email_id,
+    -- Positive, deterministic, portable ID (no dbt-utils)
+    to_varchar(abs(hash(tiktok_id, email)))           as creator_email_id,
     tiktok_id,
     email,
     data_source,
     created_at,
     updated_at,
-    case
-        when updated_at = max(updated_at) over (partition by tiktok_id)
-            then true
-        else false
-    end                                               as is_current
-from core_email
+    case when updated_at = max(updated_at) over (partition by tiktok_id)
+         then true else false end                     as is_current
+from core
