@@ -47,3 +47,37 @@ models:
           - accepted_values:
               values:
                 - echo
+
+  - name: dim_creator_email
+    description: "A table of creator email addresses collected from multiple TikTok data sources.
+      Each row represents a unique combination of TikTok ID and email. 
+      The table keeps the earliest date an email was first seen, the most recent update,
+      and flags which email is currently the most up to date for each creator."
+    columns:
+      - name: creator_email_id
+        description: "Unique identifier for each creator–email combination, generated using a consistent hash."
+        tests:
+          - not_null
+          - unique
+      - name: tiktok_id
+        description: "Unique identifier for a TikTok creator."
+        tests:
+          - not_null
+      - name: email
+        description: "Creator email address that has been cleaned (made lowercase and trimmed of any white space)."
+        tests:
+          - not_null
+      - name: data_source
+        description: "The original dataset where this creator’s email record was last updated."
+        tests:
+          - accepted_values:
+              values: ['CREATORINFO', 'HYDRATE', 'MARKET', 'BRAVO_V1', 'BRAVO_V2', 'ECHO']
+      - name: created_at
+        description: "The earliest date this email address was first recorded for the creator."
+      - name: updated_at
+        description: "The most recent date this email record was updated."
+      - name: is_current
+        description: "Indicates whether this email is the creator’s most recently updated email address."
+        tests:
+          - accepted_values:
+              values: [true, false]

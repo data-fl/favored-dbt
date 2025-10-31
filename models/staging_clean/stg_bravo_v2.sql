@@ -1,4 +1,9 @@
-{{ config(materialized='view', tags=['staging','tiktok']) }}
+{{ 
+    config(
+        materialized='view', 
+        tags=['staging','tiktok']
+    ) 
+}}
 
 select
   lower(nullif(trim(handle_name), ''))::varchar              as handle_name,
