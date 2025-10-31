@@ -1,4 +1,9 @@
-{{ config(materialized='view', tags=['staging','tiktok']) }}
+{{ 
+    config(
+            materialized='view',
+            tags=['staging','tiktok']
+        ) 
+}}
 
 select
   tiktok_id::varchar                                          as tiktok_id,
