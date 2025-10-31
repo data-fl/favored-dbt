@@ -47,3 +47,62 @@ models:
           - accepted_values:
               values:
                 - echo
+
+  - name: dim_creator_stats_log
+    description: "Full history of creator metrics over time. Keeps every version of each metric along with the time and source. The latest version is clearly marked so you can see what changed and what is current."
+    columns:
+      - name: creator_stats_id
+        description: "A unique ID generate for each record using the creator, metric, time, and source."
+        tests: [not_null, unique]
+      - name: tiktok_id
+        description: "The creator TikTok account ID."
+        tests: [not_null]
+      - name: stat_name
+        description: "The metric name (e.g., followers, follower_count, gmv_amount)."
+        tests: [not_null]
+      - name: stat_value
+        description: "The metric value at that time."
+        tests: [not_null]
+      - name: created_at
+        description: "When this value first appeared in the original source table."
+      - name: updated_at
+        description: "When this value was last updated in the original source table."
+        tests: [not_null]
+      - name: is_current
+        description: "True if this is the newest value we have for that creator and metric; false if it is an older version."
+        tests:
+          - accepted_values:
+              values: ["true","false"]
+              quote: false
+      - name: source
+        description: "Which source table the value came from"
+
+  - name: dim_creator_stats
+    description: "The current view of creator metrics. Shows only the most recent value for each metric per creator"
+    columns:
+      - name: creator_stats_id
+        description: "A stable ID for the creator + metric pair. It stays the same even as the number updates."
+        tests: [not_null, unique]
+      - name: tiktok_id
+        description: "The creators TikTok account ID."
+        tests: [not_null]
+      - name: stat_name
+        description: "The metric name (same naming as in the log)."
+        tests: [not_null]
+      - name: stat_value
+        description: "The latest number for this metric."
+        tests: [not_null]
+      - name: created_at
+        description: "When this value first appeared in the original source table."
+      - name: updated_at
+        description: "When this value was last updated in the original source table."
+        tests: [not_null]
+      - name: is_current
+        description: "Always true here—this table only keeps the latest values."
+        tests:
+          - accepted_values:
+              values: ["true"]
+              quote: false
+      - name: source
+        description: "The source table that provided the current value."
+
